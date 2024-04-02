@@ -39,17 +39,17 @@ public class VacationPayServiceImpl implements VacationPayService {
 
         LocalDate startDay = request.getVacationStartDay();
         LocalDate endDay = request.getVacationEndDay();
-        int numberOfPaidVacationDays = (int) ChronoUnit.DAYS.between(startDay, endDay);
+        int numberOfPaidVacationDays = (int) ChronoUnit.DAYS.between(startDay, endDay) + 1;
         while (startDay.isBefore(endDay)) {
             if (holidays.contains(startDay)) {
                 numberOfPaidVacationDays--;
-                endDay.plusDays(1);
+                endDay = endDay.plusDays(1);
             }
-            endDay.plusDays(1);
+            startDay = startDay.plusDays(1);
         }
 
         BigDecimal averageDailyEarnings = request.getAverageSalary()
-                .divide(BigDecimal.valueOf(AVERAGE_NUMBER_DAY_A_MONTH));
+                .divide(BigDecimal.valueOf(AVERAGE_NUMBER_DAY_A_MONTH), 2, RoundingMode.HALF_UP);
         BigDecimal vacationPayWithoutNDFL = averageDailyEarnings.multiply(BigDecimal.valueOf(numberOfPaidVacationDays));
         BigDecimal amountNDFL = vacationPayWithoutNDFL.multiply(BigDecimal.valueOf(NDFL_PERCENT));
         BigDecimal vacationPay = vacationPayWithoutNDFL.subtract(amountNDFL).setScale(2, RoundingMode.HALF_UP);
